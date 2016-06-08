@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:NetworkingPlayground.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Eskaera.xcodeproj">
+   </FileRef>
+</Workspace>

@@ -1,0 +1,54 @@
+//
+//  Task.swift
+//  Eskaera
+//
+//  Created by Victor on 08/06/2016.
+//  Copyright © 2016 Victor Rodriguez Reche. All rights reserved.
+//
+
+import Foundation
+
+public typealias JSON = [String: AnyObject]
+
+public enum Method: String {
+    case GET, POST, PUT, PATCH, DELETE
+}
+
+public protocol Task {
+    var baseURL: String { get }
+    var path: String { get }
+    var headers: JSON { get }
+    var parameters: JSON { get }
+    var method: Method { get }
+    var enqueue: Bool { get }
+    var token: String { get }
+    var authenticationToken: String? { get }
+    var configuration: NSURLSessionConfiguration { get }
+}
+
+public extension Task {
+    
+    var headers: JSON {
+        return [:]
+    }
+    
+    var parameters: JSON {
+        return [:]
+    }
+    
+    var method: Method {
+        return .GET
+    }
+    
+    var enqueue: Bool {
+        return true
+    }
+    
+    var token: String {
+        return "\(method) | \(path) | \(parameters)"
+    }
+    
+    var configuration: NSURLSessionConfiguration {
+        return NSURLSessionConfiguration.defaultSessionConfiguration()
+    }
+}
