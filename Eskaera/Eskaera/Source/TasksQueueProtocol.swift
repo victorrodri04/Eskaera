@@ -10,4 +10,5 @@ import Foundation
 
 protocol TasksQueueProtocol {
     func executeTasks()
+    func addTask(task: Task)
 }

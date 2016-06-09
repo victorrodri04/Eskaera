@@ -23,8 +23,7 @@ public protocol Task {
     var enqueue: Bool { get }
     var token: String { get }
     var authenticated: Bool { get }
-    func completed(withResponseData data: NSData)
-    func completed(withError error: ErrorType)
+    func completed(withResponse response: HTTPResponse)
 }
 
 public extension Task {

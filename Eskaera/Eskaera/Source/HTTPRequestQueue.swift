@@ -9,26 +9,36 @@
 import Foundation
 
 public class HTTPRequestQueue: TasksQueueProtocol {
-
+    
     private var httpClient: HTTPClient
     private var tasksQueue = [Task]()
     
-    init(httpClient: HTTPClient) {
+    public init(httpClient: HTTPClient) {
         self.httpClient = httpClient
     }
     
-    func addTask(task: Task) {
+    public func addTask(task: Task) {
         tasksQueue.append(task)
     }
     
-    func executeTasks() {
-        guard let task = tasksQueue.first else { return }
-        httpClient.request(task) { response in
-            
-            if let error = response.error {
-                task.completed(withError: error)
-            } else if let data = response.data {
-                task.completed(withResponseData: data)
+    public func executeTasks() {
+        
+        if tasksQueue.count > 0 {
+            let task = tasksQueue.removeFirst()
+            httpClient.request(task) { [weak self] response in
+                
+                guard let `self` = self else { return }
+                switch response {
+                case .Success(_):
+                    break
+                case .Failure(_):
+                    self.addTask(task)
+                    break
+                }
+                
+                task.completed(withResponse: response)
+                
+                self.executeTasks()
             }
         }
     }
