@@ -7,12 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		574E29EB1D09539F00558C85 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29E51D09539F00558C85 /* HTTPClient.swift */; };
+		574E29EC1D09539F00558C85 /* HTTPRequestQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29E61D09539F00558C85 /* HTTPRequestQueue.swift */; };
+		574E29ED1D09539F00558C85 /* HTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29E71D09539F00558C85 /* HTTPResponse.swift */; };
+		574E29EE1D09539F00558C85 /* HTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29E81D09539F00558C85 /* HTTPSession.swift */; };
+		574E29EF1D09539F00558C85 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29E91D09539F00558C85 /* Task.swift */; };
+		574E29F01D09539F00558C85 /* TasksQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E29EA1D09539F00558C85 /* TasksQueueProtocol.swift */; };
 		BC95051F1D08B6D500F7EF7B /* Eskaera.h in Headers */ = {isa = PBXBuildFile; fileRef = BC95051E1D08B6D500F7EF7B /* Eskaera.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BC9505261D08B6D500F7EF7B /* Eskaera.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC95051B1D08B6D500F7EF7B /* Eskaera.framework */; };
 		BC95052B1D08B6D500F7EF7B /* EskaeraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC95052A1D08B6D500F7EF7B /* EskaeraTests.swift */; };
-		BC9505391D08B96000F7EF7B /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9505381D08B96000F7EF7B /* HTTPClient.swift */; };
-		BC95053B1D08B9A300F7EF7B /* HTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC95053A1D08B9A300F7EF7B /* HTTPResponse.swift */; };
-		BC95053D1D08BA0000F7EF7B /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC95053C1D08BA0000F7EF7B /* Task.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,15 +29,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		574E29E51D09539F00558C85 /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPClient.swift; path = Eskaera/Source/HTTPClient.swift; sourceTree = "<group>"; };
+		574E29E61D09539F00558C85 /* HTTPRequestQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPRequestQueue.swift; path = Eskaera/Source/HTTPRequestQueue.swift; sourceTree = "<group>"; };
+		574E29E71D09539F00558C85 /* HTTPResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPResponse.swift; path = Eskaera/Source/HTTPResponse.swift; sourceTree = "<group>"; };
+		574E29E81D09539F00558C85 /* HTTPSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPSession.swift; path = Eskaera/Source/HTTPSession.swift; sourceTree = "<group>"; };
+		574E29E91D09539F00558C85 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Task.swift; path = Eskaera/Source/Task.swift; sourceTree = "<group>"; };
+		574E29EA1D09539F00558C85 /* TasksQueueProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TasksQueueProtocol.swift; path = Eskaera/Source/TasksQueueProtocol.swift; sourceTree = "<group>"; };
 		BC95051B1D08B6D500F7EF7B /* Eskaera.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Eskaera.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC95051E1D08B6D500F7EF7B /* Eskaera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Eskaera.h; sourceTree = "<group>"; };
 		BC9505201D08B6D500F7EF7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC9505251D08B6D500F7EF7B /* EskaeraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EskaeraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC95052A1D08B6D500F7EF7B /* EskaeraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EskaeraTests.swift; sourceTree = "<group>"; };
 		BC95052C1D08B6D500F7EF7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BC9505381D08B96000F7EF7B /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPClient.swift; path = Eskaera/Source/HTTPClient.swift; sourceTree = "<group>"; };
-		BC95053A1D08B9A300F7EF7B /* HTTPResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HTTPResponse.swift; path = Eskaera/Source/HTTPResponse.swift; sourceTree = "<group>"; };
-		BC95053C1D08BA0000F7EF7B /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Task.swift; path = Eskaera/Source/Task.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,9 +102,12 @@
 		BC9505351D08B92D00F7EF7B /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BC95053C1D08BA0000F7EF7B /* Task.swift */,
-				BC9505381D08B96000F7EF7B /* HTTPClient.swift */,
-				BC95053A1D08B9A300F7EF7B /* HTTPResponse.swift */,
+				574E29E51D09539F00558C85 /* HTTPClient.swift */,
+				574E29E61D09539F00558C85 /* HTTPRequestQueue.swift */,
+				574E29E71D09539F00558C85 /* HTTPResponse.swift */,
+				574E29E81D09539F00558C85 /* HTTPSession.swift */,
+				574E29E91D09539F00558C85 /* Task.swift */,
+				574E29EA1D09539F00558C85 /* TasksQueueProtocol.swift */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -211,9 +220,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC95053B1D08B9A300F7EF7B /* HTTPResponse.swift in Sources */,
-				BC95053D1D08BA0000F7EF7B /* Task.swift in Sources */,
-				BC9505391D08B96000F7EF7B /* HTTPClient.swift in Sources */,
+				574E29EF1D09539F00558C85 /* Task.swift in Sources */,
+				574E29ED1D09539F00558C85 /* HTTPResponse.swift in Sources */,
+				574E29F01D09539F00558C85 /* TasksQueueProtocol.swift in Sources */,
+				574E29EB1D09539F00558C85 /* HTTPClient.swift in Sources */,
+				574E29EC1D09539F00558C85 /* HTTPRequestQueue.swift in Sources */,
+				574E29EE1D09539F00558C85 /* HTTPSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

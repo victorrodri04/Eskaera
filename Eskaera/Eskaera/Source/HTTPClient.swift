@@ -11,26 +11,18 @@ import UIKit
 
 public class HTTPClient {
     
-    public init() { }
+    private var session: NSURLSession
+    public var token: String?
+    
+    public init(configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration(),
+                token: String? = nil) {
+        self.session = NSURLSession(configuration: configuration)
+        self.token = token
+    }
     
     public func request(task: Task, completion: HTTPResponse -> Void) {
         
         guard let request = request(withTask: task) else { return }
-        
-        let configuration = task.configuration
-        
-        var nsurlSession: NSURLSession?
-        
-        if let accessToken = task.authenticationToken {
-            var headers = configuration.HTTPAdditionalHeaders
-            headers?.updateValue("Bearer \(accessToken)", forKey: "Authorization")
-            configuration.HTTPAdditionalHeaders = headers
-        }
-        nsurlSession = NSURLSession(configuration: configuration)
-        
-        guard let session = nsurlSession else {
-            return completion(HTTPResponse.Failure(HTTPResponse.Error.CouldNotGetResponse))
-        }
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             
@@ -78,6 +70,12 @@ public class HTTPClient {
         let request = NSMutableURLRequest(URL: finalURL)
         request.HTTPMethod = task.method.rawValue
         
+        if task.authenticated, let token = token {
+            var headers = task.headers
+            headers["Authorization"] = "Bearer \(token)"
+            request.allHTTPHeaderFields = headers
+        }
+
         return request
     }
 }

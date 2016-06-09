@@ -10,7 +10,7 @@ import Foundation
 
 public enum HTTPResponse {
     case Success(NSData)
-    case Failure(ErrorType?)
+    case Failure(HTTPResponse.Error?)
 }
 
 public extension HTTPResponse {
@@ -20,6 +20,15 @@ public extension HTTPResponse {
             return data
         default:
             return nil
+        }
+    }
+    
+    var error: Error? {
+        switch self {
+        case .Success(_):
+            return nil
+        case .Failure(let error):
+            return error
         }
     }
     
