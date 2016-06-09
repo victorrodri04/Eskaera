@@ -6,6 +6,9 @@ import XCPlayground
 
 XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
 
+let httpClient = HTTPClient()
+let queue = HTTPRequestQueue(httpClient: httpClient)
+
 enum Pictures {
     case Popular
 }
@@ -40,8 +43,8 @@ extension Pictures: Task {
 }
 
 let popularPictures = Pictures.Popular
-queue.addTask(popularPictures)
 
+queue.addTask(popularPictures)
 
 enum Countries {
     case Name(name: String)
