@@ -22,7 +22,7 @@ extension Pictures: Task {
         return "photos"
     }
     
-    var parameters: JSON {
+    var parameters: Parameters {
         switch self {
         case .Popular:
             return ["feature": "popular", "consumer_key": "5j9QJ3HSdf3hyu5YLQDjiWPhLPFzbxJV0rHb7uEX"]
@@ -43,8 +43,7 @@ extension Pictures: Task {
 }
 
 let popularPictures = Pictures.Popular
-
-queue.addTask(popularPictures)
+queue.executeTask(popularPictures)
 
 enum Countries {
     case Name(name: String)
@@ -89,6 +88,4 @@ extension Countries: Task {
 }
 
 var countries = Countries.Name(name: "Germany")
-
-queue.addTask(countries)
-queue.executeTasks()
+queue.executeTask(countries)

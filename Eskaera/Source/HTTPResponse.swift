@@ -16,6 +16,7 @@ public enum HTTPResponse {
 public extension HTTPResponse {
     
     enum Error: ErrorType {
+        case SystemError
         case CouldNotDecodeJSON
         case CouldNotGetResponse
         case BadStatus(status: Int)

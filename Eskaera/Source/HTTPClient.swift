@@ -22,7 +22,10 @@ public class HTTPClient {
     
     public func request(task: Task, completion: HTTPResponse -> Void) {
         
-        guard let request = request(withTask: task) else { return }
+        guard let request = request(withTask: task) else {
+            completion(HTTPResponse.Failure(HTTPResponse.Error.SystemError))
+            return
+        }
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             
@@ -33,8 +36,7 @@ public class HTTPClient {
             
             if 200 ..< 300 ~= httpResponse.statusCode {
                 guard let data = data else {
-                    let error = HTTPResponse.Error.Other(error)
-                    completion(HTTPResponse.Failure(error))
+                    completion(HTTPResponse.Failure(HTTPResponse.Error.Other(error)))
                     return
                 }
                 
@@ -52,11 +54,8 @@ public class HTTPClient {
         guard let baseURL = NSURL(string: task.baseURL) else { return nil }
         let URL = baseURL.URLByAppendingPathComponent(task.path)
         
-        // NSURLComponents can fail due to programming errors, so
-        // prefer crashing than returning an optional
-        
         guard let components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: false) else {
-            fatalError("Unable to create URL components from \(URL)")
+            return nil
         }
         
         components.queryItems = task.parameters.map {
@@ -64,7 +63,7 @@ public class HTTPClient {
         }
         
         guard let finalURL = components.URL else {
-            fatalError("Unable to retrieve final URL")
+            return nil
         }
         
         let request = NSMutableURLRequest(URL: finalURL)
