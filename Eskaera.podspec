@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.author             = { "Victor Rodriguez" => 'victorrodri04@gmail.com', "Sergio Fernández" => 'fdzsergio@gmail.com' }
   s.platform     = :ios
   s.platform     = :ios, "9.0"
-  s.source       = { :git => "https://github.com/victorrodri04/Eskaera.git", :tag => spec.version }
+  s.source       = { :git => "https://github.com/victorrodri04/Eskaera.git", :tag => s.version }
   s.source_files  = "Eskaera", "Eskaera/**/*.{h,swift}"
 
 end
