@@ -11,23 +11,27 @@ import Foundation
 public typealias JSON = [String: AnyObject]
 public typealias Headers = [String: String]
 public typealias Parameters = [String: String]
-public typealias Task = protocol<TaskProtocol, TaskPolicy>
 
 public enum Method: String {
     case GET, POST, PUT, PATCH, DELETE
 }
 
-public protocol TaskProtocol {
+public protocol Task {
+    
     var baseURL: String { get }
     var path: String { get }
     var headers: Headers { get }
     var parameters: Parameters { get }
     var method: Method { get }
     var token: String { get }
+    var json: JSON { get }
+    var authenticated: Int { get }
+    var persist: Bool { get }
+    
     func completed(withResponse response: HTTPResponse)
 }
 
-public extension TaskProtocol {
+public extension Task {
     
     var headers: [String: String] {
         get {
@@ -41,31 +45,32 @@ public extension TaskProtocol {
                 TaskConstants.headers.rawValue: headers,
                 TaskConstants.parameters.rawValue: parameters,
                 TaskConstants.method.rawValue: method.rawValue,
-                TaskConstants.token.rawValue: token]
+                TaskConstants.token.rawValue: token,
+                TaskConstants.authenticated.rawValue: authenticated,
+                TaskConstants.persist.rawValue: persist
+        ]
     }
     
     var method: Method {
         return .GET
     }
     
+    var parameters: Parameters {
+        get {
+            return Parameters()
+        }
+    }
+    
     var token: String {
         return "\(method) | \(path) | \(parameters)"
     }
-}
-
-public enum TaskConstants: String {
-    case baseURL, path, headers, parameters, method, token, authenticated, persist
-}
-
-public protocol TaskPolicy {
-    var authenticated: Bool { get }
-    var persist: Bool { get }
-}
-
-public extension TaskPolicy {
-
-    var authenticated: Bool {
-        return false
+    
+    var authenticated: Int {
+        return 0
+    }
+    
+    var authenticationNeeded: Bool {
+        return Bool(authenticated)
     }
     
     var persist: Bool {
@@ -73,6 +78,20 @@ public extension TaskPolicy {
     }
 }
 
-public enum TaskPolicyConstants: String {
-    case authenticated, enqueue, persist
+public enum TaskConstants: String {
+    case baseURL, path, headers, parameters, method, token, authenticated, persist
+}
+
+//func ==<T: Task>(lhs: T, rhs: T) -> Bool {
+//    return lhs.method == rhs.method && lhs.path == rhs.path && lhs.parameters == rhs.parameters
+//}
+
+extension Bool {
+    init<T : IntegerType>(_ integer: T) {
+        if integer == 0 {
+            self.init(false)
+        } else {
+            self.init(true)
+        }
+    }
 }

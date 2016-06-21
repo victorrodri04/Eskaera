@@ -8,11 +8,23 @@
 
 import Foundation
 
-private class Request {
-    let task: Task
+public class Request: NSObject, NSCoding {
     
-    init(task: Task) {
+    var task: Task?
+    var taskDictionary: JSON?
+    
+    convenience init(task: Task) {
+        self.init()
         self.task = task
+    }
+    
+    @objc public required convenience init(coder decoder: NSCoder) {
+        self.init()
+        self.taskDictionary = decoder.decodeObjectForKey("taskDictionary") as? JSON
+    }
+    
+    @objc public func encodeWithCoder(coder: NSCoder) {
+        coder.encodeObject(taskDictionary, forKey: "taskDictionary")
     }
 }
 
@@ -28,16 +40,38 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     }
     
     public func executeTask(task: Task) {
+        
         let request = Request(task: task)
-        persistRequest(request)
         let pendingQueue = getQueue()
-        let queue = appendRequest(request, queue: pendingQueue)
+        
+        var queue: Queue!
+        if task.persist {
+            guard let savedQueue = saveRequest(request, withQueue: pendingQueue) else {
+                return task.completed(withResponse: HTTPResponse.Failure(HTTPResponse.Error.SystemError))
+            }
+            queue = savedQueue
+        } else {
+            queue = appendRequest(request, queue: pendingQueue)
+        }
+        
         executeTasks(withQueue: queue)
     }
     
     private func appendRequest(request: Request, queue: Queue) -> Queue {
         var newQueue = queue
-        let append = !newQueue.contains{ $0.task.token == request.task.token }
+        //        var persist = false
+        
+        let append = !newQueue.contains{
+            if let newQueueTask = $0.task, requestTask = request.task {
+                return newQueueTask.token == requestTask.token
+            } else if let newQueueTaskToken = $0.taskDictionary?[TaskConstants.token.rawValue] as? String,
+                requestTaskToken = request.taskDictionary?[TaskConstants.token.rawValue] as? String {
+                return newQueueTaskToken == requestTaskToken
+            } else {
+                return false
+            }
+        }
+        
         if append {
             newQueue.append(request)
         }
@@ -47,56 +81,64 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     private func executeTasks(withQueue queue: Queue) {
         var tasksQueue = queue
         if tasksQueue.count > 0 {
+            print("\(tasksQueue.count)")
             let request = tasksQueue.removeFirst()
-            httpClient.request(request.task) { [weak self] response in
+            
+            httpClient.request(request) { [weak self] response in
                 
                 guard let `self` = self else { return }
                 
                 switch response {
                 case .Success(_):
+                    self.persist(queue: tasksQueue)
                     break
                 case .Failure(_):
-                    if request.task.persist { self.persistRequest(request) }
                     break
                 }
                 
-                request.task.completed(withResponse: response)
-                
+                request.task?.completed(withResponse: response)
                 self.executeTasks(withQueue: tasksQueue)
             }
         }
     }
     
-    private func persistRequest(request: Request) {
-        var queue = getQueue()
-        let append = !queue.contains{ $0.task.token == request.task.token }
-        if append {
-            queue.append(request)
-            saveQueue(queue)
-        }
-    }
-    
-    private func nextTask() -> Request? {
-        let userDefaults = NSUserDefaults.standardUserDefaults()
-        guard var queue = userDefaults.objectForKey(queueKey) as? Queue else {
-            return nil
-        }
-        let request = queue.removeFirst()
-        saveQueue(queue)
-        return request
-    }
-    
     private func getQueue() -> Queue {
-        let userDefaults = NSUserDefaults.standardUserDefaults()
-        guard let queue = userDefaults.objectForKey(queueKey) as? Queue else {
-            return Queue()
+        let filePath = FileManager.path(withFileName: queueKey)
+        guard let data = FileManager.data(fromFilePath: filePath),
+            queue = data as? Queue else {
+                return Queue()
         }
         return queue
     }
     
-    private func saveQueue(queue: Queue) {
-        let userDefaults = NSUserDefaults.standardUserDefaults()
-        userDefaults.setObject(queue, forKey: queueKey)
-        userDefaults.synchronize()
+    private func saveRequest(request: Request, withQueue queue: Queue) -> Queue? {
+        
+        var newQueue = queue
+        var dictionary:JSON?
+        
+        if let task = request.task where task.persist {
+            dictionary = task.json
+        } else if let taskDictionary = request.taskDictionary,
+            persist = taskDictionary[TaskConstants.persist.rawValue] as? Bool where persist {
+            dictionary = taskDictionary
+        }
+        
+        guard let taskDictionary = dictionary,
+            let token = taskDictionary[TaskConstants.token.rawValue] as? String
+            else { return nil }
+        
+        let append = !newQueue.contains{ $0.task?.token == token }
+        
+        if append {
+            newQueue.append(request)
+            return persist(queue: newQueue) ? newQueue : nil
+        }
+        
+        return newQueue
+    }
+    
+    private func persist(queue queue: Queue) -> Bool {
+        let data = NSKeyedArchiver.archivedDataWithRootObject(queue)
+        return FileManager.save(data: data, path: FileManager.path(withFileName: queueKey))
     }
 }

@@ -20,14 +20,22 @@ public class HTTPClient {
         self.token = token
     }
     
-    public func request(task: Task, completion: HTTPResponse -> Void) {
+    public func request(request: Request, completion: HTTPResponse -> Void) {
         
-        guard let request = request(withTask: task) else {
+        var taskJSON: JSON?
+        
+        if let task = request.task {
+            taskJSON = task.json
+        } else if let dictionary = request.taskDictionary {
+            taskJSON = dictionary
+        }
+        
+        guard let json = taskJSON, urlRequest = createRequest(withTaskJSON: json) else {
             completion(HTTPResponse.Failure(HTTPResponse.Error.SystemError))
             return
         }
         
-        let task = session.dataTaskWithRequest(request) { data, response, error in
+        let task = session.dataTaskWithRequest(urlRequest) { data, response, error in
             
             guard let httpResponse = response as? NSHTTPURLResponse else {
                 completion(HTTPResponse.Failure(HTTPResponse.Error.CouldNotGetResponse))
@@ -49,16 +57,22 @@ public class HTTPClient {
         task.resume()
     }
     
-    private func request(withTask task: Task) -> NSURLRequest? {
+    private func createRequest(withTaskJSON taskJSON: JSON) -> NSURLRequest? {
         
-        guard let baseURL = NSURL(string: task.baseURL) else { return nil }
-        let URL = baseURL.URLByAppendingPathComponent(task.path)
+        guard let url = taskJSON[TaskConstants.baseURL.rawValue] as? String,
+            path = taskJSON[TaskConstants.path.rawValue] as? String,
+            parameters = taskJSON[TaskConstants.parameters.rawValue] as? Parameters,
+            method = taskJSON[TaskConstants.method.rawValue] as? String,
+            authenticated = taskJSON[TaskConstants.authenticated.rawValue] as? Int,
+            taskHeaders = taskJSON[TaskConstants.headers.rawValue] as? Headers,
+            baseURL = NSURL(string: url) else { return nil }
+        let URL = baseURL.URLByAppendingPathComponent(path)
         
         guard let components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: false) else {
             return nil
         }
         
-        components.queryItems = task.parameters.map {
+        components.queryItems = parameters.map {
             NSURLQueryItem(name: String($0), value: String($1))
         }
         
@@ -67,14 +81,14 @@ public class HTTPClient {
         }
         
         let request = NSMutableURLRequest(URL: finalURL)
-        request.HTTPMethod = task.method.rawValue
+        request.HTTPMethod = method
         
-        if task.authenticated, let token = token {
-            var headers = task.headers
+        if Bool(authenticated), let token = token {
+            var headers = taskHeaders
             headers["Authorization"] = "Bearer \(token)"
             request.allHTTPHeaderFields = headers
         }
-
+        
         return request
     }
 }
