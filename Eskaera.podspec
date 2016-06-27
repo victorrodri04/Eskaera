@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "Eskaera"
-  s.version      = "1.0.1"
+  s.version      = "1.0.0"
   s.summary      = "Swift library to enqueue and execute RESTfull HTTP requests."
   s.description  = <<-DESC
                    This library can be used to persistent queue REST http requests avoiding
