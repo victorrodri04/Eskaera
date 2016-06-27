@@ -9,7 +9,7 @@
 import Foundation
 
 public enum HTTPResponse {
-    case Success(AnyObject?)
+    case Success(NSData?)
     case Failure(HTTPResponse.Error)
 }
 

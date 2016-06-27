@@ -57,36 +57,40 @@ public class HTTPClient {
         task.resume()
     }
     
-    private func request(withTask task: Task) -> NSURLRequest? {
+    private func createRequest(withTaskJSON taskJSON: JSON) -> NSURLRequest? {
         
-        guard let baseURL = NSURL(string: task.baseURL) else { return nil }
-        let URL = baseURL.URLByAppendingPathComponent(task.path)
+        guard let urlString = taskJSON[TaskConstants.baseURL.rawValue] as? String,
+            baseURL = NSURL(string: urlString),
+            path = taskJSON[TaskConstants.path.rawValue] as? String,
+            methodString = taskJSON[TaskConstants.method.rawValue] as? String,
+            method = Method(rawValue: methodString),
+            parameters = taskJSON[TaskConstants.parameters.rawValue] as? Parameters,
+            authenticated = taskJSON[TaskConstants.authenticated.rawValue] as? Bool,
+            headers = taskJSON[TaskConstants.headers.rawValue] as? Headers
+            else { return nil }
+        
+        let URL = baseURL.URLByAppendingPathComponent(path)
         
         guard let components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: false) else {
             return nil
         }
         
-        var queryItems: [NSURLQueryItem]?
-        var queryString: NSData?
-        
-        switch task.method {
-        case .GET:
-            queryItems = task.parameters.map {
-                NSURLQueryItem(name: String($0), value: String($1))
-            }
-        case .POST:
-            queryString = components.percentEncodedQuery?.dataUsingEncoding(NSUTF8StringEncoding)
-        default:
-            break
+        let queryItems = parameters.map {
+            NSURLQueryItem(name: String($0), value: String($1))
         }
         
         let request = NSMutableURLRequest()
-        request.HTTPMethod = task.method.rawValue
+        request.HTTPMethod = method.rawValue
         
-        if let queryItems = queryItems {
+        switch method {
+        case .GET:
             components.queryItems = queryItems
-        } else if let queryString = queryString {
-            request.HTTPBody = queryString
+        case .POST:
+            let postComponents = NSURLComponents()
+            postComponents.queryItems = queryItems
+            request.HTTPBody = postComponents.percentEncodedQuery?.dataUsingEncoding(NSUTF8StringEncoding)
+        default:
+            break
         }
         
         guard let finalURL = components.URL else {
@@ -95,8 +99,8 @@ public class HTTPClient {
         
         request.URL = finalURL
         
-        if task.authenticated, let token = token {
-            var headers = task.headers
+        if authenticated, let token = token {
+            var headers = headers
             headers["Authorization"] = "Bearer \(token)"
             request.allHTTPHeaderFields = headers
         }
