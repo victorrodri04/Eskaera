@@ -57,34 +57,46 @@ public class HTTPClient {
         task.resume()
     }
     
-    private func createRequest(withTaskJSON taskJSON: JSON) -> NSURLRequest? {
+    private func request(withTask task: Task) -> NSURLRequest? {
         
-        guard let url = taskJSON[TaskConstants.baseURL.rawValue] as? String,
-            path = taskJSON[TaskConstants.path.rawValue] as? String,
-            parameters = taskJSON[TaskConstants.parameters.rawValue] as? Parameters,
-            method = taskJSON[TaskConstants.method.rawValue] as? String,
-            authenticated = taskJSON[TaskConstants.authenticated.rawValue] as? Int,
-            taskHeaders = taskJSON[TaskConstants.headers.rawValue] as? Headers,
-            baseURL = NSURL(string: url) else { return nil }
-        let URL = baseURL.URLByAppendingPathComponent(path)
+        guard let baseURL = NSURL(string: task.baseURL) else { return nil }
+        let URL = baseURL.URLByAppendingPathComponent(task.path)
         
         guard let components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: false) else {
             return nil
         }
         
-        components.queryItems = parameters.map {
-            NSURLQueryItem(name: String($0), value: String($1))
+        var queryItems: [NSURLQueryItem]?
+        var queryString: NSData?
+        
+        switch task.method {
+        case .GET:
+            queryItems = task.parameters.map {
+                NSURLQueryItem(name: String($0), value: String($1))
+            }
+        case .POST:
+            queryString = components.percentEncodedQuery?.dataUsingEncoding(NSUTF8StringEncoding)
+        default:
+            break
+        }
+        
+        let request = NSMutableURLRequest()
+        request.HTTPMethod = task.method.rawValue
+        
+        if let queryItems = queryItems {
+            components.queryItems = queryItems
+        } else if let queryString = queryString {
+            request.HTTPBody = queryString
         }
         
         guard let finalURL = components.URL else {
             return nil
         }
         
-        let request = NSMutableURLRequest(URL: finalURL)
-        request.HTTPMethod = method
+        request.URL = finalURL
         
-        if Bool(authenticated), let token = token {
-            var headers = taskHeaders
+        if task.authenticated, let token = token {
+            var headers = task.headers
             headers["Authorization"] = "Bearer \(token)"
             request.allHTTPHeaderFields = headers
         }

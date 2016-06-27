@@ -25,7 +25,7 @@ public protocol Task {
     var method: Method { get }
     var token: String { get }
     var json: JSON { get }
-    var authenticated: Int { get }
+    var authenticated: Bool { get }
     var persist: Bool { get }
     
     func completed(withResponse response: HTTPResponse)
@@ -65,12 +65,8 @@ public extension Task {
         return "\(method) | \(path) | \(parameters)"
     }
     
-    var authenticated: Int {
-        return 0
-    }
-    
-    var authenticationNeeded: Bool {
-        return Bool(authenticated)
+    var authenticated: Bool {
+        return true
     }
     
     var persist: Bool {
@@ -80,18 +76,4 @@ public extension Task {
 
 public enum TaskConstants: String {
     case baseURL, path, headers, parameters, method, token, authenticated, persist
-}
-
-//func ==<T: Task>(lhs: T, rhs: T) -> Bool {
-//    return lhs.method == rhs.method && lhs.path == rhs.path && lhs.parameters == rhs.parameters
-//}
-
-extension Bool {
-    init<T : IntegerType>(_ integer: T) {
-        if integer == 0 {
-            self.init(false)
-        } else {
-            self.init(true)
-        }
-    }
 }

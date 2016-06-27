@@ -58,9 +58,8 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     }
     
     private func appendRequest(request: Request, queue: Queue) -> Queue {
-        var newQueue = queue
-        //        var persist = false
         
+        var newQueue = queue
         let append = !newQueue.contains{
             if let newQueueTask = $0.task, requestTask = request.task {
                 return newQueueTask.token == requestTask.token
