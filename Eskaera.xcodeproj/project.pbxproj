@@ -105,12 +105,12 @@
 		BC9505351D08B92D00F7EF7B /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				57BE741A1D1929B8007E8C74 /* FileManager.swift */,
+				574E29E51D09539F00558C85 /* HTTPClient.swift */,
 				574E29F91D0965D700558C85 /* HTTPRequestQueue.swift */,
+				574E29E71D09539F00558C85 /* HTTPResponse.swift */,
 				574E29FA1D0965D700558C85 /* Task.swift */,
 				574E29FB1D0965D700558C85 /* TasksQueueProtocol.swift */,
-				574E29E51D09539F00558C85 /* HTTPClient.swift */,
-				574E29E71D09539F00558C85 /* HTTPResponse.swift */,
-				57BE741A1D1929B8007E8C74 /* FileManager.swift */,
 			);
 			name = Source;
 			sourceTree = "<group>";

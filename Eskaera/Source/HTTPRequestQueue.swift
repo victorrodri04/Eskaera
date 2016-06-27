@@ -24,7 +24,8 @@ public class Request: NSObject, NSCoding {
     }
     
     @objc public func encodeWithCoder(coder: NSCoder) {
-        coder.encodeObject(taskDictionary, forKey: "taskDictionary")
+        let dictionary = task?.json ?? taskDictionary
+        coder.encodeObject(dictionary, forKey: "taskDictionary")
     }
 }
 
@@ -35,19 +36,28 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     
     private var httpClient: HTTPClient
     
+    private var pendingQueue: Queue {
+        return getQueue()
+    }
+    
     public init(httpClient: HTTPClient) {
         self.httpClient = httpClient
+    }
+    
+    public func persistTask(task: Task) {
+        let request = Request(task: task)
+        persistRequest(request, inQueue: pendingQueue)
     }
     
     public func executeTask(task: Task) {
         
         let request = Request(task: task)
-        let pendingQueue = getQueue()
         
         var queue: Queue!
         if task.persist {
-            guard let savedQueue = saveRequest(request, withQueue: pendingQueue) else {
-                return task.completed(withResponse: HTTPResponse.Failure(HTTPResponse.Error.SystemError))
+            guard let savedQueue = persistRequest(request, inQueue: pendingQueue) else {
+                request.task?.completed(withResponse: HTTPResponse.Failure(HTTPResponse.Error.SystemError))
+                return
             }
             queue = savedQueue
         } else {
@@ -55,6 +65,17 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         }
         
         executeTasks(withQueue: queue)
+    }
+    
+    public func executePendingTasks() {
+        executeTasks(withQueue: pendingQueue)
+    }
+    
+    private func persistRequest(request: Request, inQueue queue: Queue) -> Queue? {
+        guard let savedQueue = saveRequest(request, withQueue: queue) else {
+            return nil
+        }
+        return savedQueue
     }
     
     private func appendRequest(request: Request, queue: Queue) -> Queue {
@@ -80,7 +101,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     private func executeTasks(withQueue queue: Queue) {
         var tasksQueue = queue
         if tasksQueue.count > 0 {
-            print("\(tasksQueue.count)")
+            
             let request = tasksQueue.removeFirst()
             
             httpClient.request(request) { [weak self] response in
@@ -115,7 +136,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         var newQueue = queue
         var dictionary:JSON?
         
-        if let task = request.task where task.persist {
+        if let task = request.task {
             dictionary = task.json
         } else if let taskDictionary = request.taskDictionary,
             persist = taskDictionary[TaskConstants.persist.rawValue] as? Bool where persist {
