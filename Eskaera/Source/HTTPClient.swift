@@ -11,6 +11,8 @@ import UIKit
 
 public class HTTPClient {
     
+    public static let sharedInstance = HTTPClient()
+    
     private var session: NSURLSession
     public var token: String?
     

@@ -31,14 +31,18 @@ public class Request: NSObject, NSCoding {
 
 public class HTTPRequestQueue: TasksQueueProtocol {
     
+    public static let sharedInstance = HTTPRequestQueue(httpClient: HTTPClient.sharedInstance)
+    
     private typealias Queue = [Request]
     private let queueKey = "persistentQueue"
     
-    private var httpClient: HTTPClient
+    public var httpClient: HTTPClient
     
     private var pendingQueue: Queue {
         return getQueue()
     }
+    
+    private var inProgressRequests = [String: Request]()
     
     public init(httpClient: HTTPClient) {
         self.httpClient = httpClient
@@ -75,9 +79,16 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     }
     
     private func appendRequest(request: Request, queue: Queue) -> Queue {
-        
         var newQueue = queue
-        let append = !newQueue.contains{
+        let append = !requestsQueue(queue, containsRequest: request)
+        if append {
+            newQueue.append(request)
+        }
+        return newQueue
+    }
+    
+    private func requestsQueue(queue: Queue, containsRequest request: Request) -> Bool {
+        return queue.contains {
             if let newQueueTask = $0.task, requestTask = request.task {
                 return newQueueTask.token == requestTask.token
             } else if let newQueueTaskToken = $0.taskDictionary?[TaskConstants.token.rawValue] as? String,
@@ -87,22 +98,26 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 return false
             }
         }
-        
-        if append {
-            newQueue.append(request)
-        }
-        return newQueue
     }
     
     private func executeTasks(withQueue queue: Queue) {
+        
         var tasksQueue = queue
-        if tasksQueue.count > 0 {
+        
+        if tasksQueue.count > 0{
             
             let request = tasksQueue.removeFirst()
+            
+            guard let token = request.task?.token ?? request.taskDictionary?[TaskConstants.token.rawValue] as? String
+                where inProgressRequests[token] == nil  else { return }
+                
+            inProgressRequests[token] = request
             
             httpClient.request(request) { [weak self] response in
                 
                 guard let `self` = self else { return }
+                
+                self.inProgressRequests.removeValueForKey(token)
                 
                 switch response {
                 case .Success(_):
@@ -115,6 +130,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 request.task?.completed(withResponse: response)
                 self.executeTasks(withQueue: tasksQueue)
             }
+            
         }
     }
     
