@@ -44,15 +44,8 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         self.httpClient = httpClient
     }
     
-    public func persistTask(task: Task) {
+    public func addTask(task: Task) {
         let request = Request(task: task)
-        persistRequest(request, inQueue: pendingQueue)
-    }
-    
-    public func executeTask(task: Task) {
-        
-        let request = Request(task: task)
-        
         var queue: Queue!
         if task.persist {
             guard let savedQueue = persistRequest(request, inQueue: pendingQueue) else {
@@ -63,11 +56,14 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         } else {
             queue = appendRequest(request, queue: pendingQueue)
         }
-        
-        executeTasks(withQueue: queue)
     }
     
-    public func executePendingTasks() {
+    public func executeTask(task: Task) {
+        addTask(task)
+        executeTasks()
+    }
+    
+    public func executeTasks() {
         executeTasks(withQueue: pendingQueue)
     }
     
