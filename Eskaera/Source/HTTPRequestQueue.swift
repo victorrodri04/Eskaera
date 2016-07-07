@@ -121,10 +121,9 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 
                 switch response {
                 case .Success(_):
-                    self.persist(queue: tasksQueue)
                     break
                 case .Failure(_):
-                    break
+                    self.persist(queue: tasksQueue)
                 }
                 
                 request.task?.completed(withResponse: response)
