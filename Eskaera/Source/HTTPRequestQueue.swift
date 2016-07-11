@@ -38,9 +38,9 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     
     public var httpClient: HTTPClient
     
-    private var pendingQueue: Queue {
-        return getQueue()
-    }
+    private lazy var pendingQueue: Queue = {
+        return self.getQueue()
+    }()
     
     private var inProgressRequests = [String: Request]()
     
@@ -49,17 +49,16 @@ public class HTTPRequestQueue: TasksQueueProtocol {
     }
     
     public func addTask(task: Task) {
-        let request = Request(task: task)
-        var queue: Queue!
         if task.persist {
-            guard let savedQueue = persistRequest(request, inQueue: pendingQueue) else {
-                request.task?.completed(withResponse: HTTPResponse.Failure(HTTPResponse.Error.SystemError))
-                return
-            }
-            queue = savedQueue
-        } else {
-            queue = appendRequest(request, queue: pendingQueue)
+            persistTask(task)
         }
+        let request = Request(task: task)
+        return appendRequest(request)
+    }
+    
+    public func persistTask(task: Task) {
+        let request = Request(task: task)
+        saveRequest(request)
     }
     
     public func executeTask(task: Task) {
@@ -71,20 +70,11 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         executeTasks(withQueue: pendingQueue)
     }
     
-    private func persistRequest(request: Request, inQueue queue: Queue) -> Queue? {
-        guard let savedQueue = saveRequest(request, withQueue: queue) else {
-            return nil
-        }
-        return savedQueue
-    }
-    
-    private func appendRequest(request: Request, queue: Queue) -> Queue {
-        var newQueue = queue
-        let append = !requestsQueue(queue, containsRequest: request)
+    private func appendRequest(request: Request) {
+        let append = !requestsQueue(pendingQueue, containsRequest: request)
         if append {
-            newQueue.append(request)
+            pendingQueue.append(request)
         }
-        return newQueue
     }
     
     private func requestsQueue(queue: Queue, containsRequest request: Request) -> Bool {
@@ -122,6 +112,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 switch response {
                 case .Success(_):
                     self.persist(queue: tasksQueue)
+                    self.pendingQueue = tasksQueue
                     break
                 case .Failure(_):
                     break
@@ -143,9 +134,9 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         return queue
     }
     
-    private func saveRequest(request: Request, withQueue queue: Queue) -> Queue? {
+    private func saveRequest(request: Request) {
         
-        var newQueue = queue
+        var newQueue = pendingQueue
         var dictionary:JSON?
         
         if let task = request.task {
@@ -157,16 +148,14 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         
         guard let taskDictionary = dictionary,
             let token = taskDictionary[TaskConstants.token.rawValue] as? String
-            else { return nil }
+            else { return }
         
         let append = !newQueue.contains{ $0.task?.token == token }
         
         if append {
             newQueue.append(request)
-            return persist(queue: newQueue) ? newQueue : nil
+            pendingQueue = persist(queue: newQueue) ? newQueue : pendingQueue
         }
-        
-        return newQueue
     }
     
     private func persist(queue queue: Queue) -> Bool {
