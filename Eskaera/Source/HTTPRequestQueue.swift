@@ -56,7 +56,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
         return appendRequest(request)
     }
     
-    public func persistTask(task: Task) {
+    private func persistTask(task: Task) {
         let request = Request(task: task)
         saveRequest(request)
     }
@@ -114,7 +114,16 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                     self.persist(queue: tasksQueue)
                     self.pendingQueue = tasksQueue
                     break
-                case .Failure(_):
+                case .Failure(let error):
+                    if case .Other(let failureError) = error, let task = request.task as? Errorable {
+                        for key in task.errorsToSkip.keys {
+                            if let value = failureError.userInfo[key] as? String,
+                                containsValue = task.errorsToSkip[key]?.contains(value) where containsValue {
+                                self.persist(queue: tasksQueue)
+                                self.pendingQueue = tasksQueue
+                            }
+                        }
+                    }
                     break
                 }
                 

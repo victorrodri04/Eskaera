@@ -20,6 +20,6 @@ public extension HTTPResponse {
         case CouldNotDecodeJSON
         case CouldNotGetResponse
         case BadStatus(status: Int)
-        case Other(NSError?)
+        case Other(NSError)
     }
 }

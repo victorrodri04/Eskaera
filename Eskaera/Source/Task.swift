@@ -16,6 +16,10 @@ public enum Method: String {
     case GET, POST, PUT, PATCH, DELETE
 }
 
+public protocol Errorable {
+    var errorsToSkip: [String: [String]] { get }
+}
+
 public protocol Task {
     
     var baseURL: String { get }
@@ -34,9 +38,7 @@ public protocol Task {
 public extension Task {
     
     var headers: [String: String] {
-        get {
-            return [:]
-        }
+        return [:]
     }
     
     var json: JSON {
@@ -56,9 +58,7 @@ public extension Task {
     }
     
     var parameters: Parameters {
-        get {
-            return Parameters()
-        }
+        return Parameters()
     }
     
     var token: String {

@@ -39,17 +39,16 @@ public class HTTPClient {
         
         let task = session.dataTaskWithRequest(urlRequest) { data, response, error in
             
+            if let error = error {
+                return completion(HTTPResponse.Failure(HTTPResponse.Error.Other(error)))
+            }
+            
             guard let httpResponse = response as? NSHTTPURLResponse else {
                 completion(HTTPResponse.Failure(HTTPResponse.Error.CouldNotGetResponse))
                 return
             }
             
             if 200 ..< 300 ~= httpResponse.statusCode {
-                guard let data = data else {
-                    completion(HTTPResponse.Failure(HTTPResponse.Error.Other(error)))
-                    return
-                }
-                
                 completion(HTTPResponse.Success(data))
             } else {
                 completion(HTTPResponse.Failure(HTTPResponse.Error.BadStatus(status: httpResponse.statusCode)))
