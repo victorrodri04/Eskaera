@@ -115,7 +115,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                     self.pendingQueue = tasksQueue
                     break
                 case .Failure(let error):
-                    if case .Other(let failureError) = error, let task = request.task as? Errorable {
+                    if case .Other(let failureError) = error, let task = request.task as? ErrorSkipable {
                         for key in task.errorsToSkip.keys {
                             if let value = failureError.userInfo[key] as? String,
                                 containsValue = task.errorsToSkip[key]?.contains(value) where containsValue {

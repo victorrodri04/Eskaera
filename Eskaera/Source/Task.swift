@@ -16,7 +16,7 @@ public enum Method: String {
     case GET, POST, PUT, PATCH, DELETE
 }
 
-public protocol Errorable {
+public protocol ErrorSkipable {
     var errorsToSkip: [String: [String]] { get }
 }
 
