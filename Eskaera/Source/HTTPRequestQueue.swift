@@ -108,23 +108,24 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 guard let `self` = self else { return }
                 
                 self.inProgressRequests.removeValueForKey(token)
-                
+                var overridePersistedQueue = false
                 switch response {
                 case .Success(_):
-                    self.persist(queue: tasksQueue)
-                    self.pendingQueue = tasksQueue
+                    overridePersistedQueue = true
                     break
                 case .Failure(let error):
-                    if case .Other(let failureError) = error, let task = request.task as? ErrorSkipable {
-                        for key in task.errorsToSkip.keys {
-                            if let value = failureError.userInfo[key] as? String,
-                                containsValue = task.errorsToSkip[key]?.contains(value) where containsValue {
-                                self.persist(queue: tasksQueue)
-                                self.pendingQueue = tasksQueue
-                            }
+                    if case .Resquest(let data) = error, let task = request.task as? ErrorSkipable {
+                        guard let data = data else { break }
+                        // If the task should be persisted do not override the persisted queue to not loose the task
+                        if task.shoulPersistTask(withFailureResponseData: data) {
+                            overridePersistedQueue = false
                         }
                     }
-                    break
+                }
+                
+                if overridePersistedQueue {
+                    self.persist(queue: tasksQueue)
+                    self.pendingQueue = tasksQueue
                 }
                 
                 request.task?.completed(withResponse: response)

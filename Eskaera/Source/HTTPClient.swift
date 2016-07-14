@@ -51,7 +51,7 @@ public class HTTPClient {
             if 200 ..< 300 ~= httpResponse.statusCode {
                 completion(HTTPResponse.Success(data))
             } else {
-                completion(HTTPResponse.Failure(HTTPResponse.Error.BadStatus(status: httpResponse.statusCode)))
+                completion(HTTPResponse.Failure(HTTPResponse.Error.Resquest(data: data)))
             }
         }
         

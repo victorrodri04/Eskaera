@@ -17,7 +17,7 @@ public enum Method: String {
 }
 
 public protocol ErrorSkipable {
-    var errorsToSkip: [String: [String]] { get }
+    func shoulPersistTask(withFailureResponseData data: NSData) -> Bool
 }
 
 public protocol Task {

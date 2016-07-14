@@ -19,7 +19,7 @@ public extension HTTPResponse {
         case SystemError
         case CouldNotDecodeJSON
         case CouldNotGetResponse
-        case BadStatus(status: Int)
-        case Other(NSError)
+        case Resquest(data: NSData?)
+        case Other(NSError?)
     }
 }
