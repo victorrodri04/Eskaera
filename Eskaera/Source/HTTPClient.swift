@@ -99,6 +99,7 @@ public class HTTPClient {
         }
         
         request.URL = finalURL
+        request.allHTTPHeaderFields = headers
         
         if authenticated, let token = token {
             var headers = headers
