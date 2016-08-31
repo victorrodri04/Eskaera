@@ -103,9 +103,7 @@ public class HTTPRequestQueue: TasksQueueProtocol {
                 
             inProgressRequests[token] = request
             
-            httpClient.request(request) { [weak self] response in
-                
-                guard let `self` = self else { return }
+            httpClient.request(request) { response in
                 
                 self.inProgressRequests.removeValueForKey(token)
                 var overridePersistedQueue = false
