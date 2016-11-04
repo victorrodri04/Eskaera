@@ -3,8 +3,9 @@
 import Eskaera
 
 import XCPlayground
+import PlaygroundSupport
 
-XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
+PlaygroundPage.current.needsIndefiniteExecution = true
 
 let httpClient = HTTPClient()
 let queue = HTTPRequestQueue(httpClient: httpClient)
@@ -29,13 +30,13 @@ extension Pictures: Task {
         }
     }
     
-    func completed(withResponse response: HTTPResponse) {
+    func completed(with response: HTTPResponse) {
         switch response {
-        case .Success(let data):
+        case .success(let data):
             guard let data = data else { return }
             print(data)
             break
-        case .Failure(let error):
+        case .failure(let error):
             print(error)
             break
         }
@@ -46,8 +47,8 @@ let popularPictures = Pictures.Popular
 queue.executeTask(popularPictures)
 
 enum Countries {
-    case Name(name: String)
-    case AlphaCodes(codes: [String])
+    case name(_: String)
+    case alphaCodes(_: [String])
 }
 
 extension Countries: Task {
@@ -58,34 +59,34 @@ extension Countries: Task {
 
     var path: String {
         switch self {
-        case let .Name(name):
+        case let .name(name):
             return "name/\(name)"
-        case .AlphaCodes:
+        case .alphaCodes:
             return "alpha"
         }
     }
 
     var parameters: [String: String] {
         switch self {
-        case .Name:
+        case .name:
             return ["fullText": "true"]
-        case let .AlphaCodes(codes):
-            return ["codes": codes.joinWithSeparator(";")]
+        case let .alphaCodes(codes):
+            return ["codes": codes.joined(separator: ";")]
         }
     }
 
-    func completed(withResponse response: HTTPResponse) {
+    func completed(with response: HTTPResponse) {
         switch response {
-        case .Success(let data):
+        case .success(let data):
             guard let data = data else { return }
             print(data)
             break
-        case .Failure(let error):
+        case .failure(let error):
             print(error)
             break
         }
     }
 }
 
-var countries = Countries.Name(name: "Germany")
+var countries = Countries.name("Germany")
 queue.executeTask(countries)

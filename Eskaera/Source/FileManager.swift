@@ -11,33 +11,20 @@ import Foundation
 struct FileManager {
     
     static func fileExists(atPath path: String) -> Bool {
-        return NSFileManager.defaultManager().fileExistsAtPath(path)
+        return Foundation.FileManager.default.fileExists(atPath: path)
     }
     
     static func path(withFileName filename: String) -> String {
-        let path = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let docuemntsPath = path[0]
-        return docuemntsPath.stringByAppendingString("/"+filename)
-    }
-    
-    static func saveFile(withURL url: NSURL, atPath path: String) {
-        
-        guard let path = url.path else { return }
-        
-        let fileManager = NSFileManager.defaultManager()
-        do {
-            try fileManager.removeItemAtPath(path)
-            try fileManager.moveItemAtPath(path, toPath: path)
-        } catch {
-            
-        }
+        return docuemntsPath + ("/"+filename)
     }
     
     static func data(fromFilePath filePath: String) -> AnyObject? {
-        return NSKeyedUnarchiver.unarchiveObjectWithFile(filePath)
+        return NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as AnyObject?
     }
     
-    static func save(data data: NSData, path: String) -> Bool {
-        return data.writeToFile(path, atomically: true)
+    static func save(data: Data, path: String) -> Bool {
+        return ((try? data.write(to: URL(fileURLWithPath: path), options: [.atomic])) != nil)
     }
 }

@@ -1,0 +1,6 @@
+framework module Eskaera {
+  umbrella header "Eskaera-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,15 +1,15 @@
 //
-//  EskaeraTests.swift
-//  EskaeraTests
+//  ExampleTests.swift
+//  ExampleTests
 //
-//  Created by Victor on 08/06/2016.
-//  Copyright © 2016 Victor Rodriguez Reche. All rights reserved.
+//  Created by Victor on 04/11/2016.
+//  Copyright © 2016 Victor Rodriguez. All rights reserved.
 //
 
 import XCTest
-@testable import Eskaera
+@testable import Example
 
-class EskaeraTests: XCTestCase {
+class ExampleTests: XCTestCase {
     
     override func setUp() {
         super.setUp()

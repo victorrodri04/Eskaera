@@ -9,20 +9,20 @@
 import Foundation
 import UIKit
 
-public class HTTPClient {
+open class HTTPClient {
     
-    public static let sharedInstance = HTTPClient()
+    open static let sharedInstance = HTTPClient()
     
-    private var session: NSURLSession
-    public var token: String?
+    fileprivate var session: URLSession
+    open var token: String?
     
-    public init(configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration(),
+    public init(configuration: URLSessionConfiguration = URLSessionConfiguration.default,
                 token: String? = nil) {
-        self.session = NSURLSession(configuration: configuration)
+        self.session = URLSession(configuration: configuration)
         self.token = token
     }
     
-    public func request(request: Request, completion: HTTPResponse -> Void) {
+    open func request(_ request: Request, completion: @escaping (HTTPResponse) -> Void) {
         
         var taskJSON: JSON?
         
@@ -32,81 +32,87 @@ public class HTTPClient {
             taskJSON = dictionary
         }
         
-        guard let json = taskJSON, urlRequest = createRequest(withTaskJSON: json) else {
-            completion(HTTPResponse.Failure(HTTPResponse.Error.SystemError))
+        guard let json = taskJSON, let urlRequest = createRequest(with: json) else {
+            completion(HTTPResponse.failure(HTTPResponse.error.system))
             return
         }
         
-        let task = session.dataTaskWithRequest(urlRequest) { data, response, error in
+        let task = session.dataTask(with: urlRequest, completionHandler: { data, response, error in
             
             if let error = error {
-                return completion(HTTPResponse.Failure(HTTPResponse.Error.Other(error)))
+                return completion(HTTPResponse.failure(HTTPResponse.error.other(error)))
             }
             
-            guard let httpResponse = response as? NSHTTPURLResponse else {
-                completion(HTTPResponse.Failure(HTTPResponse.Error.CouldNotGetResponse))
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(HTTPResponse.failure(HTTPResponse.error.couldNotGetResponse))
                 return
             }
             
             if 200 ..< 300 ~= httpResponse.statusCode {
-                completion(HTTPResponse.Success(data))
+                completion(HTTPResponse.success(data))
             } else {
-                completion(HTTPResponse.Failure(HTTPResponse.Error.Resquest(data: data)))
+                completion(HTTPResponse.failure(HTTPResponse.error.resquest(data: data)))
             }
-        }
+        }) 
         
         task.resume()
     }
     
-    private func createRequest(withTaskJSON taskJSON: JSON) -> NSURLRequest? {
+    fileprivate func createRequest(with taskJSON: JSON) -> URLRequest? {
         
-        guard let urlString = taskJSON[TaskConstants.baseURL.rawValue] as? String,
-            baseURL = NSURL(string: urlString),
-            path = taskJSON[TaskConstants.path.rawValue] as? String,
-            methodString = taskJSON[TaskConstants.method.rawValue] as? String,
-            method = Method(rawValue: methodString),
-            parameters = taskJSON[TaskConstants.parameters.rawValue] as? Parameters,
-            authenticated = taskJSON[TaskConstants.authenticated.rawValue] as? Bool,
-            headers = taskJSON[TaskConstants.headers.rawValue] as? Headers
-            else { return nil }
+        guard
+            let urlString = taskJSON[TaskConstants.baseURL.rawValue] as? String,
+            let baseURL = Foundation.URL(string: urlString),
+            let path = taskJSON[TaskConstants.path.rawValue] as? String,
+            let methodString = taskJSON[TaskConstants.method.rawValue] as? String,
+            let method = Method(rawValue: methodString),
+            let parameters = taskJSON[TaskConstants.parameters.rawValue] as? Parameters,
+            let authenticated = taskJSON[TaskConstants.authenticated.rawValue] as? Bool,
+            let authorizationType = taskJSON[TaskConstants.authorizationType.rawValue] as? String,
+            let headers = taskJSON[TaskConstants.headers.rawValue] as? Headers
+        else {
+            return nil
+        }
         
-        let URL = baseURL.URLByAppendingPathComponent(path)
+        let URL = baseURL.appendingPathComponent(path)
         
-        guard let components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: false) else {
+        guard
+            var components = URLComponents(url: URL, resolvingAgainstBaseURL: false)
+        else {
             return nil
         }
         
         let queryItems = parameters.map {
-            NSURLQueryItem(name: String($0), value: String($1))
+            URLQueryItem(name: String($0), value: String($1))
         }
         
         let request = NSMutableURLRequest()
-        request.HTTPMethod = method.rawValue
+        request.httpMethod = method.rawValue
         
         switch method {
         case .GET:
             components.queryItems = queryItems
         case .POST:
-            let postComponents = NSURLComponents()
+            var postComponents = URLComponents()
             postComponents.queryItems = queryItems
-            request.HTTPBody = postComponents.percentEncodedQuery?.dataUsingEncoding(NSUTF8StringEncoding)
+            request.httpBody = postComponents.percentEncodedQuery?.data(using: String.Encoding.utf8)
         default:
             break
         }
         
-        guard let finalURL = components.URL else {
+        guard let finalURL = components.url else {
             return nil
         }
         
-        request.URL = finalURL
+        request.url = finalURL
         request.allHTTPHeaderFields = headers
         
         if authenticated, let token = token {
             var headers = headers
-            headers["Authorization"] = "Bearer \(token)"
+            headers["Authorization"] = authorizationType + token
             request.allHTTPHeaderFields = headers
         }
         
-        return request
+        return request as URLRequest
     }
 }

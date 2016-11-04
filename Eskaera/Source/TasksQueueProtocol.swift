@@ -9,5 +9,5 @@
 import Foundation
 
 protocol TasksQueueProtocol {
-    func executeTask(task: Task)
+    func executeTask(_ task: Task)
 }

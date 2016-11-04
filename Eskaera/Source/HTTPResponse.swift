@@ -9,17 +9,17 @@
 import Foundation
 
 public enum HTTPResponse {
-    case Success(NSData?)
-    case Failure(HTTPResponse.Error)
+    case success(Data?)
+    case failure(HTTPResponse.error)
 }
 
 public extension HTTPResponse {
     
-    enum Error: ErrorType {
-        case SystemError
-        case CouldNotDecodeJSON
-        case CouldNotGetResponse
-        case Resquest(data: NSData?)
-        case Other(NSError?)
+    enum error: Error {
+        case system
+        case couldNotDecodeJSON
+        case couldNotGetResponse
+        case resquest(data: Data?)
+        case other(Error?)
     }
 }

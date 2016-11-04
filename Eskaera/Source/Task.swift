@@ -17,7 +17,7 @@ public enum Method: String {
 }
 
 public protocol ErrorSkipable {
-    func shoulPersistTask(withFailureResponseData data: NSData) -> Bool
+    func shoulPersistTask(with failureResponseData: Data) -> Bool
 }
 
 public protocol Task {
@@ -27,12 +27,13 @@ public protocol Task {
     var headers: Headers { get }
     var parameters: Parameters { get }
     var method: Method { get }
-    var token: String { get }
+    var identifier: String { get }
     var json: JSON { get }
     var authenticated: Bool { get }
+    var authorizationType: String { get }
     var persist: Bool { get }
     
-    func completed(withResponse response: HTTPResponse)
+    func completed(with response: HTTPResponse)
 }
 
 public extension Task {
@@ -42,14 +43,15 @@ public extension Task {
     }
     
     var json: JSON {
-        return [TaskConstants.baseURL.rawValue: baseURL,
-                TaskConstants.path.rawValue: path,
-                TaskConstants.headers.rawValue: headers,
-                TaskConstants.parameters.rawValue: parameters,
-                TaskConstants.method.rawValue: method.rawValue,
-                TaskConstants.token.rawValue: token,
-                TaskConstants.authenticated.rawValue: authenticated,
-                TaskConstants.persist.rawValue: persist
+        return [TaskConstants.baseURL.rawValue: baseURL as AnyObject,
+                TaskConstants.path.rawValue: path as AnyObject,
+                TaskConstants.headers.rawValue: headers as AnyObject,
+                TaskConstants.parameters.rawValue: parameters as AnyObject,
+                TaskConstants.method.rawValue: method.rawValue as AnyObject,
+                TaskConstants.identifier.rawValue: identifier as AnyObject,
+                TaskConstants.authenticated.rawValue: authenticated as AnyObject,
+                TaskConstants.authorizationType.rawValue: authorizationType as AnyObject,
+                TaskConstants.persist.rawValue: persist as AnyObject
         ]
     }
     
@@ -61,7 +63,7 @@ public extension Task {
         return Parameters()
     }
     
-    var token: String {
+    var identifier: String {
         return "\(method) | \(path) | \(parameters)"
     }
     
@@ -69,11 +71,15 @@ public extension Task {
         return true
     }
     
+    var authorizationType: String {
+        return "Bearer "
+    }
+    
     var persist: Bool {
         return false
     }
 }
 
-public enum TaskConstants: String {
-    case baseURL, path, headers, parameters, method, token, authenticated, persist
+enum TaskConstants: String {
+    case baseURL, path, headers, parameters, method, identifier, authenticated, authorizationType, persist
 }

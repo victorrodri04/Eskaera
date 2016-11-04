@@ -1,0 +1,16 @@
+PODS:
+  - Eskaera (1.0.0)
+
+DEPENDENCIES:
+  - Eskaera (from `../`)
+
+EXTERNAL SOURCES:
+  Eskaera:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Eskaera: f24c943fdc268e80497bd0dec1b6ac536da34f1a
+
+PODFILE CHECKSUM: d18ae5ae7a2f3d1e5a44eb514776524ad2516d3e
+
+COCOAPODS: 1.1.1
